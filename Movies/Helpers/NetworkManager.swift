@@ -8,47 +8,18 @@
 import Foundation
 import Reachability
 
-class NetworkManager: NSObject {
-    var reachability: Reachability!
+class NetworkManager {
+    
+    init() {}
     static let shared = NetworkManager()
     
-    override init() {
-        super.init()
-        try? reachability = Reachability()
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(networkStatusChanged(_:)),
-                                               name: .reachabilityChanged,
-                                               object: reachability)
-        do {
-            try reachability.startNotifier()
-        } catch {
-            print("Unable to start notifier")
-        }
-        
-    }
+    var isConnectedToInternet: Bool { reachable(host: "apple.com") }
     
-    static func stopNotifier() -> Void {
-        do {
-            try (NetworkManager.shared.reachability).startNotifier()
-        } catch {
-            print("Error stopping notifier")
-        }
-    }
-    
-    static func isReachable(completed: @escaping (NetworkManager) -> Void) {
-        if (NetworkManager.shared.reachability).connection != .unavailable {
-            completed(NetworkManager.shared)
-        }
-    }
-    
-    func isNotReachable() -> Bool {
-        if (NetworkManager.shared.reachability).connection == .unavailable {
-            return true
-        }
-        return false
-    }
-    
-    @objc func networkStatusChanged(_ notification: Notification) {
+    func reachable(host: String) -> Bool {
+        var res: UnsafeMutablePointer<addrinfo>?
+        let n = getaddrinfo(host, nil, nil, &res)
+        freeaddrinfo(res)
+        return n == 0
     }
     
 }

@@ -31,7 +31,10 @@ class MovieListVM: ObservableObject {
     }
     
     func fetchMovies() {
-        APIService.shared.fetchMovies(category: self.category)
+        if NetworkManager.shared.isConnectedToInternet {
+            APIService.shared.fetchMovies(category: self.category)
+        }
+        hasNetworkError = !NetworkManager.shared.isConnectedToInternet
     }
     
     func fetchMovieDetails() {
